@@ -1,0 +1,81 @@
+package com.example.TestNg;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class BookingTest {
+
+    @BeforeClass
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost"; // Application runs on localhost
+        RestAssured.port = 8080; // Application runs on port 8080
+    }
+
+    @Test
+    public void testGetAllBookings() {
+        given()
+            .when()
+                .get("/booking")
+            .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("size()", greaterThan(0)); // Assuming it returns at least one booking
+    }
+
+    @Test
+    public void testCreateNewBooking_Success() {
+        String requestBody = "{\"booking_id\": 1006, \"booking_name\": \"bobby\", \"payment_mode\": \"paytm wallet\", \"cinema_id\": \"1\", \"movie_name\": \"KGF-2\"}";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(requestBody)
+        .when()
+            .post("/booking")
+        .then()
+            .statusCode(201)
+            .body(equalTo("Booking created successfully!"));
+    }
+
+
+
+    @Test
+    public void testGetBookingById_ExistingId() {
+        given()
+            .pathParam("id", 1001)
+        .when()
+            .get("/booking/{id}")
+        .then()
+            .statusCode(200)
+            .body("booking_name", equalTo("raj"));
+    }
+
+    @Test
+    public void testGetBookingById_NonExistingId() {
+        given()
+            .pathParam("id", 999) // Assuming there's no booking with ID 999 in the database
+        .when()
+            .get("/booking/{id}")
+        .then()
+            .statusCode(404); // Not Found status code for non-existing resource
+    }
+
+//    @Test
+//    public void testDeleteBooking_Success() {
+//        given()
+//            .pathParam("id", 1006) // Assuming booking with ID 1006 exists
+//        .when()
+//            .delete("/booking/{id}")
+//        .then()
+//            .statusCode(200)
+//            .body(equalTo("Booking deleted successfully!"));
+//    }
+
+ 
+
+
+}

@@ -1,0 +1,38 @@
+//cinema
+
+package com.example.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.model.Cinema;
+
+public interface CinemaRepository extends JpaRepository<Cinema, Long> {
+
+}
+
+..........................................................................
+
+//movie
+
+package com.example.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.model.Movie;
+
+public interface MovieRepository extends JpaRepository<Movie, Long>{
+
+}
+
+.............................................................................
+//booking
+
+package com.example.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.model.Booking;
+
+public interface BookingRepository extends JpaRepository<Booking, Long>{
+
+}

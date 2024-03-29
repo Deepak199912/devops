@@ -1,0 +1,83 @@
+package com.example;
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
+import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
+import com.example.controller.CinemaController;
+import com.example.model.Cinema;
+import com.example.repository.CinemaRepository;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.testng.Assert;
+import org.testng.ITestResult;
+import org.testng.annotations.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.*;
+
+public class CinemaTests {
+
+    @Mock
+    private CinemaRepository cinemaRepository;
+
+    @InjectMocks
+    private CinemaController cinemaController;
+
+    private ExtentReports extentReports;
+    private ExtentTest extentTest;
+
+    @BeforeSuite
+    public void setUpReport() {
+        ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter("test-output-cinema/ExtentReport.html");
+        extentReports = new ExtentReports();
+        extentReports.attachReporter(htmlReporter);
+    }
+
+    @BeforeMethod
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        extentTest = extentReports.createTest(getClass().getSimpleName() + "." + Thread.currentThread().getStackTrace()[1].getMethodName());
+    }
+
+    @AfterMethod
+    public void tearDown(ITestResult result) {
+        if (result.getStatus() == ITestResult.SUCCESS) {
+            extentTest.log(Status.PASS, "Test passed");
+        } else if (result.getStatus() == ITestResult.FAILURE) {
+            extentTest.log(Status.FAIL, "Test failed");
+        } else if (result.getStatus() == ITestResult.SKIP) {
+            extentTest.log(Status.SKIP, "Test skipped");
+        }
+
+        extentReports.flush();
+    }
+
+    @Test
+    public void testGetAllCinemas() {
+        // Mock data
+        List<Cinema> mockCinemas = new ArrayList<>();
+        mockCinemas.add(new Cinema());
+        mockCinemas.add(new Cinema());
+
+        // Mock repository behavior
+        when(cinemaRepository.findAll()).thenReturn(mockCinemas);
+
+        // Call the controller method
+        ResponseEntity<List<Cinema>> response = cinemaController.getAllCinemas();
+
+        // Verify the result
+        Assert.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assert.assertEquals(response.getBody(), mockCinemas);
+
+        // Verify that findAll method is called on the repository
+        verify(cinemaRepository, times(1)).findAll();
+
+        // Log to ExtentReport
+        extentTest.log(Status.INFO, "Test case completed successfully");
+    }
+}
